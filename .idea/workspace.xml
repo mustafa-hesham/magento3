@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+    <component name="PhpDebugGeneral" xdebug_debug_port="9003" ignore_connections_through_unregistered_servers="true">
+        <xdebug_debug_ports port="9003" />
+        <xdebug_debug_ports port="9111" />
+    </component>
+    <component name="PhpServers">
+        <servers>
+            <server host="http://localhost" id="7e16e907-9ce3-4559-9d26-a30a5650d11f" name="create-magento-app" />
+        </servers>
+    </component>
+    <component name="RunManager">
+        <configuration name="create-magento-app" type="PhpRemoteDebugRunConfigurationType" factoryName="PHP Remote Debug" filter_connections="FILTER" server_name="create-magento-app" session_id="PHPSTORM">
+            <method v="2" />
+        </configuration>
+    </component>
+    <component name="PropertiesComponent">
+        <property name="DatabaseDriversLRU" value="mysql" />
+    </component>
+</project>
