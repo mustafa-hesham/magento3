@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @category    Scandiweb
+ * @package     Scandiweb_Test
+ * @author      Mustafa Hesham <mustafa.hesham@scandiweb.com>
+ * @copyright   Copyright (c) 2022 Scandiweb, Ltd (https://scandiweb.com)
+ */
+
 namespace Scandiweb\Test\Setup\Patch\Data;
 
 use Magento\Catalog\Api\CategoryLinkManagementInterface;
@@ -22,16 +29,18 @@ use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use \Magento\Catalog\Api\CategoryRepositoryInterface; //Added to make sure the category exists by getting name by id.
+use \Psr\Log\LoggerInterface;
 
 /**
  * Create Migration product class
  */
 class CreateMenProduct implements DataPatchInterface
 {
-        /**
+    /**
      * {@inheritDoc}
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [];
     }
@@ -39,10 +48,21 @@ class CreateMenProduct implements DataPatchInterface
     /**
      * {@inheritDoc}
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }
+
+    /**
+     * @var \Magento\Catalog\Api\CategoryRepositoryInterface
+     */
+    private CategoryRepositoryInterface $categoryRepository;
+
+    /**
+     * @var \Psr\Log\LoggerInterface;
+     */
+    private LoggerInterface $logger;
+
 
     /**
      * @var ModuleDataSetupInterface
@@ -99,7 +119,7 @@ class CreateMenProduct implements DataPatchInterface
      * @param SourceItemsSaveInterface $sourceItemsSaveInterface
      * @param State $appState
      * @param StoreManagerInterface $storeManager
-		 * @param EavSetup $eavSetup
+     * @param EavSetup $eavSetup
      * @param CategoryLinkManagementInterface $categoryLink
      */
     public function __construct(
@@ -111,7 +131,9 @@ class CreateMenProduct implements DataPatchInterface
         EavSetup $eavSetup,
         SourceItemInterfaceFactory $sourceItemFactory,
         SourceItemsSaveInterface $sourceItemsSaveInterface,
-				CategoryLinkManagementInterface $categoryLink
+        CategoryLinkManagementInterface $categoryLink,
+        CategoryRepositoryInterface $categoryRepository,
+        LoggerInterface $logger
     ) {
         $this->appState = $appState;
         $this->productInterfaceFactory = $productInterfaceFactory;
@@ -122,6 +144,8 @@ class CreateMenProduct implements DataPatchInterface
         $this->sourceItemFactory = $sourceItemFactory;
         $this->sourceItemsSaveInterface = $sourceItemsSaveInterface;
         $this->categoryLink = $categoryLink;
+        $this->categoryRepository = $categoryRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -130,7 +154,6 @@ class CreateMenProduct implements DataPatchInterface
     public function apply()
     {
         $this->appState->emulateAreaCode('adminhtml', [$this, 'execute']);
-        $this->execute();
     }
 
     /**
@@ -149,10 +172,9 @@ class CreateMenProduct implements DataPatchInterface
         }
 
         $this->setup->getConnection()->startSetup();
-
         $attributeSetId = $this->eavSetup->getAttributeSetId(Product::ENTITY, 'Default');
         $websiteIDs = [$this->storeManager->getStore()->getWebsiteId()];
-            $product->setTypeId(Type::TYPE_SIMPLE)
+        $product->setTypeId(Type::TYPE_SIMPLE)
             ->setWebsiteIds($websiteIDs)
             ->setAttributeSetId($attributeSetId)
             ->setName('Sport Brah Men')
@@ -172,10 +194,16 @@ class CreateMenProduct implements DataPatchInterface
         $this->sourceItems[] = $sourceItemFactory;
 
         $this->sourceItemsSaveInterface->execute($this->sourceItems);
+        try {
+            $categoryInstance = $this->categoryRepository->get(3, null);
+            // Check first if the category of id 3 is named Men.
+            if ($categoryInstance->getName() == 'Men') {
+                $this->categoryLink->assignProductToCategories($product->getSku(), [3]); // Created a Men category in the admin panel
+            }
+        } catch (NoSuchEntityException $ex) {
+            $this->logger->critical($ex);
+        }
 
-        $this->categoryLink->assignProductToCategories($product->getSku(), [3]); // Created a Men category in the admin panel
         $this->setup->getConnection()->endSetup();
     }
-
-
 }

@@ -1,9 +1,10 @@
 <?php
+
 /**
- * @category    Example
- * @package     Example_Migration
- * @author      Ralfs Aizsils <info@scandiweb.com>
- * @copyright   Copyright (c) 2021 Scandiweb, Ltd (https://scandiweb.com)
+ * @category    Scandiweb
+ * @package     Scandiweb_Test
+ * @author      Mustafa Hesham <mustafa.hesham@scandiweb.com>
+ * @copyright   Copyright (c) 2022 Scandiweb, Ltd (https://scandiweb.com)
  */
 
 namespace Scandiweb\Test\Setup\Patch\Data;
@@ -34,10 +35,10 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class CreateGripTrainerProduct implements DataPatchInterface
 {
-        /**
+    /**
      * {@inheritDoc}
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [];
     }
@@ -45,7 +46,7 @@ class CreateGripTrainerProduct implements DataPatchInterface
     /**
      * {@inheritDoc}
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }
@@ -105,7 +106,7 @@ class CreateGripTrainerProduct implements DataPatchInterface
      * @param SourceItemsSaveInterface $sourceItemsSaveInterface
      * @param State $appState
      * @param StoreManagerInterface $storeManager
-		 * @param EavSetup $eavSetup
+     * @param EavSetup $eavSetup
      * @param CategoryLinkManagementInterface $categoryLink
      */
     public function __construct(
@@ -117,7 +118,7 @@ class CreateGripTrainerProduct implements DataPatchInterface
         EavSetup $eavSetup,
         SourceItemInterfaceFactory $sourceItemFactory,
         SourceItemsSaveInterface $sourceItemsSaveInterface,
-				CategoryLinkManagementInterface $categoryLink
+        CategoryLinkManagementInterface $categoryLink
     ) {
         $this->appState = $appState;
         $this->productInterfaceFactory = $productInterfaceFactory;
@@ -136,7 +137,6 @@ class CreateGripTrainerProduct implements DataPatchInterface
     public function apply()
     {
         $this->appState->emulateAreaCode('adminhtml', [$this, 'execute']);
-        $this->execute();
     }
 
     /**
@@ -158,7 +158,7 @@ class CreateGripTrainerProduct implements DataPatchInterface
 
         $attributeSetId = $this->eavSetup->getAttributeSetId(Product::ENTITY, 'Default');
         $websiteIDs = [$this->storeManager->getStore()->getWebsiteId()];
-            $product->setTypeId(Type::TYPE_SIMPLE)
+        $product->setTypeId(Type::TYPE_SIMPLE)
             ->setWebsiteIds($websiteIDs)
             ->setAttributeSetId($attributeSetId)
             ->setName('Grip Trainer')
@@ -182,6 +182,4 @@ class CreateGripTrainerProduct implements DataPatchInterface
         $this->categoryLink->assignProductToCategories($product->getSku(), [2]);
         $this->setup->getConnection()->endSetup();
     }
-
-
 }
