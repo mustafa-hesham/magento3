@@ -19,6 +19,9 @@ atlassian*
 /app/code/Magento/TestModule*
 /lib
 /node_modules
+/auth.json
+/localhost+1-key.pem
+/localhost+1.pem
 /setup
 /.grunt
 /Gruntfile.js
