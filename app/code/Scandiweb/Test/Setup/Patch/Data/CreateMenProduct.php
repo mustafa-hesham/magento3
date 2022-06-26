@@ -197,9 +197,9 @@ class CreateMenProduct implements DataPatchInterface
         try {
             $categoryInstance = $this->categoryRepository->get(3, null);
             // Check first if the category of id 3 is named Men.
-            if ($categoryInstance->getName() == 'Men') {
+            if ($categoryInstance->getName() == 'Men') 
                 $this->categoryLink->assignProductToCategories($product->getSku(), [3]); // Created a Men category in the admin panel
-            }
+            
         } catch (NoSuchEntityException $ex) {
             $this->logger->critical($ex);
         }
