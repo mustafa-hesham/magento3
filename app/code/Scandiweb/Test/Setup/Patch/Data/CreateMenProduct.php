@@ -29,8 +29,9 @@ use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use \Magento\Catalog\Api\CategoryRepositoryInterface; //Added to make sure the category exists by getting name by id.
+//use \Magento\Catalog\Api\CategoryRepositoryInterface; //Added to make sure the category exists by getting name by id.
 use \Psr\Log\LoggerInterface;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 
 /**
  * Create Migration product class
@@ -56,7 +57,7 @@ class CreateMenProduct implements DataPatchInterface
     /**
      * @var \Magento\Catalog\Api\CategoryRepositoryInterface
      */
-    private CategoryRepositoryInterface $categoryRepository;
+    //private CategoryRepositoryInterface $categoryRepository;
 
     /**
      * @var \Psr\Log\LoggerInterface;
@@ -110,6 +111,11 @@ class CreateMenProduct implements DataPatchInterface
     protected array $sourceItems = [];
 
     /**
+     * @var CategoryCollectionFactory
+     */
+    protected CategoryCollectionFactory $categoryCollectionFactory;
+
+    /**
      * Migration patch constructor.
      *
      * @param ModuleDataSetupInterface $setup
@@ -132,8 +138,9 @@ class CreateMenProduct implements DataPatchInterface
         SourceItemInterfaceFactory $sourceItemFactory,
         SourceItemsSaveInterface $sourceItemsSaveInterface,
         CategoryLinkManagementInterface $categoryLink,
-        CategoryRepositoryInterface $categoryRepository,
-        LoggerInterface $logger
+        //CategoryRepositoryInterface $categoryRepository,
+        LoggerInterface $logger,
+        CategoryCollectionFactory $categoryCollectionFactory
     ) {
         $this->appState = $appState;
         $this->productInterfaceFactory = $productInterfaceFactory;
@@ -144,8 +151,9 @@ class CreateMenProduct implements DataPatchInterface
         $this->sourceItemFactory = $sourceItemFactory;
         $this->sourceItemsSaveInterface = $sourceItemsSaveInterface;
         $this->categoryLink = $categoryLink;
-        $this->categoryRepository = $categoryRepository;
+        //$this->categoryRepository = $categoryRepository;
         $this->logger = $logger;
+        $this->categoryCollectionFactory = $categoryCollectionFactory;
     }
 
     /**
@@ -195,10 +203,10 @@ class CreateMenProduct implements DataPatchInterface
 
         $this->sourceItemsSaveInterface->execute($this->sourceItems);
         try {
-            $categoryInstance = $this->categoryRepository->get(3, null);
-            // Check first if the category of id 3 is named Men.
-            if ($categoryInstance->getName() == 'Men')
-                $this->categoryLink->assignProductToCategories($product->getSku(), [3]); // Created a Men category in the admin panel
+            $categoryID = $this->categoryCollectionFactory->create()->addAttributeToFilter('name', 'Men')->getAllIds();
+            // Check first if the category Men exists.
+            if (count($categoryID))
+                $this->categoryLink->assignProductToCategories($product->getSku(), $categoryID); // Created a Men category in the admin panel
 
         } catch (NoSuchEntityException $ex) {
             $this->logger->critical($ex);
